@@ -33,6 +33,13 @@ void WLED::reset()
   DEBUG_PRINTLN(F("WLED RESET"));
   ESP.restart();
 }
+// boston code
+bool lightKitOn = false;
+
+void toggleLightKit() {
+  lightKitOn = !lightKitOn;
+  digitalWrite(5, lightKitOn ? HIGH : LOW);
+}
 
 void WLED::loop()
 {
@@ -505,6 +512,15 @@ void WLED::setup()
   DEBUG_PRINTLN(F("initServer"));
   initServer();
   DEBUG_PRINTF_P(PSTR("heap %u\n"), ESP.getFreeHeap());
+
+  // boston code
+pinMode(5, OUTPUT);   // Set up relay GPIO
+digitalWrite(5, LOW); // Start relay OFF
+
+server.on("/lightkit", HTTP_GET, [](AsyncWebServerRequest *request){
+  toggleLightKit();
+  request->send(200, "text/plain", "Relay toggled");
+});
 
 #ifndef WLED_DISABLE_INFRARED
   // init IR
